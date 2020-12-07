@@ -1,9 +1,10 @@
+use std::collections::HashMap;
 use std::collections::HashSet;
 
 #[derive(Debug)]
 struct Bag {
     color: String,
-    count: i16,
+    count: usize,
 }
 
 fn create_bag(color_1: &str, color_2: &str, count_str: &str) -> Bag {
@@ -11,15 +12,9 @@ fn create_bag(color_1: &str, color_2: &str, count_str: &str) -> Bag {
     color.push_str(" ");
     color.push_str(color_2);
 
-    let count = count_str.parse::<i16>().unwrap();
+    let count = count_str.parse::<usize>().unwrap();
 
     Bag { count, color }
-}
-
-#[derive(Debug)]
-struct Rule {
-    color: String, // top level bag color
-    contained_bags: Option<Vec<Bag>>,
 }
 
 pub fn part1(inp: String) {
@@ -40,33 +35,26 @@ dotted black bags contain no other bags.
     */
     let lines = read_lines(&inp);
 
-    // TODO a hashmap instead of a Vec would be better for lookup :-(
-    let rules: Vec<Rule> = lines
+    let rules: HashMap<String, Option<Vec<Bag>>> = lines
         .iter()
         .filter(|line| line.len() > 0)
         .map(|line| create_rule(line))
         .collect();
 
-    println!("Rules: {:?}", rules);
-    println!("# of rules: {:?}", rules.len());
+    let shiny_gold_holding_colors = get_shiny_gold_holding_bag_colors(&rules);
 
-    let shiny_gold_holding_colors = get_shiny_gold_holding_bag_colors(rules);
-
-    println!("Colors of bags that can hold shiny gold: {:?}", shiny_gold_holding_colors);
-
-    println!("# of bag colors that can hold shiny gold: {}", shiny_gold_holding_colors.len());
+    println!(
+        "# of bag colors that can hold shiny gold: {}",
+        shiny_gold_holding_colors.len()
+    );
 }
 
-fn get_shiny_gold_holding_bag_colors(rules: Vec<Rule>) -> HashSet<String> {
+fn get_shiny_gold_holding_bag_colors(rules: &HashMap<String, Option<Vec<Bag>>>) -> HashSet<String> {
     let mut shiny_gold_holding_colors = HashSet::<String>::new();
 
     for rule in rules.iter() {
-        if can_contain_shiny_gold_bag(
-            &rule.color,
-            &rules,
-            &mut shiny_gold_holding_colors,
-        ) {
-            shiny_gold_holding_colors.insert(rule.color.to_string());
+        if can_contain_shiny_gold_bag(&rule.0, rules, &mut shiny_gold_holding_colors) {
+            shiny_gold_holding_colors.insert(rule.0.to_string());
         }
     }
 
@@ -75,22 +63,19 @@ fn get_shiny_gold_holding_bag_colors(rules: Vec<Rule>) -> HashSet<String> {
 
 fn can_contain_shiny_gold_bag(
     color: &String,
-    rules: &Vec<Rule>,
+    rules: &HashMap<String, Option<Vec<Bag>>>,
     shiny_gold_holding_colors: &mut HashSet<String>,
 ) -> bool {
     if shiny_gold_holding_colors.contains(color) {
         return true;
     }
 
-    // would be better if rules was a HashMap :-(
-    let rule = rules.iter().find(|r| r.color == *color);
+    let rule = &rules[color];
     if rule.is_none() {
-        // we should rather panic…
-        println!("No rule for color {}", color);
         return false;
     }
 
-    match &rule.unwrap().contained_bags {
+    match rule {
         None => {
             return false;
         }
@@ -129,7 +114,7 @@ fn read_lines(inp: &str) -> Vec<&str> {
         .collect::<Vec<&str>>()
 }
 
-fn create_rule(line: &str) -> Rule {
+fn create_rule(line: &str) -> (String, Option<Vec<Bag>>) {
     let groups = line.split(" bags contain ");
 
     let vec: Vec<&str> = groups.collect();
@@ -146,10 +131,7 @@ fn create_rule(line: &str) -> Rule {
         })
         .collect();
 
-    Rule {
-        color,
-        contained_bags,
-    }
+    (color, contained_bags)
 }
 
 #[cfg(test)]
@@ -158,107 +140,88 @@ mod test {
 
     #[test]
     pub fn get_shiny_gold_holding_bag_colors_single_empty_bag() {
-        let rule = Rule {
-            color: "testing green".to_owned(),
-            contained_bags: None,
-        };
+        let mut rules = HashMap::<String, Option<Vec<Bag>>>::new();
+        rules.insert("testing green".to_owned(), None);
 
-        let bag_colors = get_shiny_gold_holding_bag_colors(vec![rule]);
+        let bag_colors = get_shiny_gold_holding_bag_colors(&rules);
 
         assert_eq!(bag_colors.len(), 0);
     }
 
     #[test]
     pub fn get_shiny_gold_holding_bag_colors_single_bag_holding_gold() {
-        let shiny_bag = create_bag("shiny", "gold", "4");
-        let rule = Rule {
-            color: "testing green".to_owned(),
-            contained_bags: Some(vec![shiny_bag]),
-        };
+        let mut rules = HashMap::<String, Option<Vec<Bag>>>::new();
+        rules.insert(
+            "testing green".to_owned(),
+            Some(vec![create_bag("shiny", "gold", "4")]),
+        );
 
-        let bag_colors = get_shiny_gold_holding_bag_colors(vec![rule]);
+        let bag_colors = get_shiny_gold_holding_bag_colors(&rules);
 
         assert_eq!(bag_colors.len(), 1);
     }
 
     #[test]
     pub fn get_shiny_gold_holding_bag_colors_single_bag_holding_gold_and_other() {
+        let mut rules = HashMap::<String, Option<Vec<Bag>>>::new();
         let shiny_bag = create_bag("shiny", "gold", "4");
         let other_bag = create_bag("bording", "grey", "1");
-        let rule = Rule {
-            color: "testing green".to_owned(),
-            contained_bags: Some(vec![shiny_bag, other_bag]),
-        };
+        rules.insert("testing green".to_owned(), Some(vec![shiny_bag, other_bag]));
 
-        let bag_colors = get_shiny_gold_holding_bag_colors(vec![rule]);
+        let bag_colors = get_shiny_gold_holding_bag_colors(&rules);
 
         assert_eq!(bag_colors.len(), 1);
     }
 
     #[test]
     pub fn get_shiny_gold_holding_bag_colors_multiple_rules_one_direct_gold() {
+        let mut rules = HashMap::<String, Option<Vec<Bag>>>::new();
         let shiny_bag = create_bag("shiny", "gold", "4");
         let other_bag = create_bag("bording", "grey", "1");
-        let rule_no_gold = Rule {
-            color: "raging red".to_owned(),
-            contained_bags: None,
-        };
-        let rule_gold = Rule {
-            color: "testing green".to_owned(),
-            contained_bags: Some(vec![shiny_bag, other_bag]),
-        };
+        rules.insert("raging red".to_owned(), None);
+        rules.insert("testing green".to_owned(), Some(vec![shiny_bag, other_bag]));
 
-        let bag_colors = get_shiny_gold_holding_bag_colors(vec![rule_no_gold, rule_gold]);
+        let bag_colors = get_shiny_gold_holding_bag_colors(&rules);
 
         assert_eq!(bag_colors.len(), 1);
     }
 
     #[test]
     pub fn get_shiny_gold_holding_bag_colors_multiple_rules_one_gold_nested_level_1() {
-        let direct = Rule {
-            color: "bright white".to_owned(),
-            contained_bags: Some(vec![create_bag("shiny", "gold", "1")]),
-        };
-        let indirect_level_1 = Rule {
-            color: "dark orange".to_owned(),
-            contained_bags: Some(vec![create_bag("bright", "white", "4")]),
-        };
-        let rule_no_gold = Rule {
-            color: "raging red".to_owned(),
-            contained_bags: None,
-        };
+        let mut rules = HashMap::<String, Option<Vec<Bag>>>::new();
+        rules.insert(
+            "bright white".to_owned(),
+            Some(vec![create_bag("shiny", "gold", "1")]),
+        );
+        rules.insert(
+            "dark orange".to_owned(),
+            Some(vec![create_bag("bright", "white", "4")]),
+        );
+        rules.insert("raging red".to_owned(), None);
 
-        let bag_colors =
-            get_shiny_gold_holding_bag_colors(vec![direct, indirect_level_1, rule_no_gold]);
+        let bag_colors = get_shiny_gold_holding_bag_colors(&rules);
 
         assert_eq!(bag_colors.len(), 2);
     }
 
     #[test]
     pub fn get_shiny_gold_holding_bag_colors_multiple_rules_one_gold_nested_level_2() {
-        let direct = Rule {
-            color: "bright white".to_owned(),
-            contained_bags: Some(vec![create_bag("shiny", "gold", "1")]),
-        };
-        let indirect_level_1 = Rule {
-            color: "dark orange".to_owned(),
-            contained_bags: Some(vec![create_bag("bright", "white", "4")]),
-        };
-        let indirect_level_2 = Rule {
-            color: "goofy grey".to_owned(),
-            contained_bags: Some(vec![create_bag("dark", "orange", "3")]),
-        };
-        let rule_no_gold = Rule {
-            color: "raging red".to_owned(),
-            contained_bags: None,
-        };
+        let mut rules = HashMap::<String, Option<Vec<Bag>>>::new();
+        rules.insert(
+            "bright white".to_owned(),
+            Some(vec![create_bag("shiny", "gold", "1")]),
+        );
+        rules.insert(
+            "dark orange".to_owned(),
+            Some(vec![create_bag("bright", "white", "4")]),
+        );
+        rules.insert(
+            "goofy grey".to_owned(),
+            Some(vec![create_bag("dark", "orange", "3")]),
+        );
+        rules.insert("raging red".to_owned(), None);
 
-        let bag_colors = get_shiny_gold_holding_bag_colors(vec![
-            indirect_level_2,
-            rule_no_gold,
-            direct,
-            indirect_level_1,
-        ]);
+        let bag_colors = get_shiny_gold_holding_bag_colors(&rules);
 
         assert_eq!(bag_colors.len(), 3);
     }
