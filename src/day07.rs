@@ -18,21 +18,15 @@ fn create_bag(color_1: &str, color_2: &str, count_str: &str) -> Bag {
 }
 
 pub fn part1(inp: String) {
-    /*
-    let lines = read_lines(
-        r#"
-light red bags contain 1 bright white bag, 2 muted yellow bags.
-dark orange bags contain 3 bright white bags, 4 muted yellow bags.
-bright white bags contain 1 shiny gold bag.
-muted yellow bags contain 2 shiny gold bags, 9 faded blue bags.
-shiny gold bags contain 1 dark olive bag, 2 vibrant plum bags.
-dark olive bags contain 3 faded blue bags, 4 dotted black bags.
-vibrant plum bags contain 5 faded blue bags, 6 dotted black bags.
-faded blue bags contain no other bags.
-dotted black bags contain no other bags.
-"#,
+    let shiny_gold_holding_colors = parse_bag_rules(inp);
+
+    println!(
+        "# of bag colors that can hold shiny gold: {}",
+        shiny_gold_holding_colors.len()
     );
-    */
+}
+
+fn parse_bag_rules(inp: String) -> HashSet<String> {
     let lines = read_lines(&inp);
 
     let rules: HashMap<String, Option<Vec<Bag>>> = lines
@@ -41,12 +35,7 @@ dotted black bags contain no other bags.
         .map(|line| create_rule(line))
         .collect();
 
-    let shiny_gold_holding_colors = get_shiny_gold_holding_bag_colors(&rules);
-
-    println!(
-        "# of bag colors that can hold shiny gold: {}",
-        shiny_gold_holding_colors.len()
-    );
+    get_shiny_gold_holding_bag_colors(&rules)
 }
 
 fn get_shiny_gold_holding_bag_colors(rules: &HashMap<String, Option<Vec<Bag>>>) -> HashSet<String> {
@@ -224,5 +213,43 @@ mod test {
         let bag_colors = get_shiny_gold_holding_bag_colors(&rules);
 
         assert_eq!(bag_colors.len(), 3);
+    }
+
+    #[test]
+    pub fn official_part_1_sample_input() {
+        let input = r#"
+light red bags contain 1 bright white bag, 2 muted yellow bags.
+dark orange bags contain 3 bright white bags, 4 muted yellow bags.
+bright white bags contain 1 shiny gold bag.
+muted yellow bags contain 2 shiny gold bags, 9 faded blue bags.
+shiny gold bags contain 1 dark olive bag, 2 vibrant plum bags.
+dark olive bags contain 3 faded blue bags, 4 dotted black bags.
+vibrant plum bags contain 5 faded blue bags, 6 dotted black bags.
+faded blue bags contain no other bags.
+dotted black bags contain no other bags.
+"#;
+
+        let shiny_gold_holding_colors = parse_bag_rules(input.to_string());
+
+        assert_eq!(shiny_gold_holding_colors.len(), 4);
+        assert_eq!(
+            shiny_gold_holding_colors.contains("bright white"),
+            true,
+            "A bright white bag, which can hold your shiny gold bag directly."
+        );
+        assert_eq!(
+            shiny_gold_holding_colors.contains("muted yellow"),
+            true,
+            "A muted yellow bag, which can hold your shiny gold bag directly, plus some other bags."
+        );
+        assert_eq!(
+            shiny_gold_holding_colors.contains("dark orange"),
+             true,
+            "A dark orange bag, which can hold bright white and muted yellow bags, either of which could then hold your shiny gold bag."
+        );
+        assert_eq!(shiny_gold_holding_colors.contains("light red"),
+             true,
+            "A light red bag, which can hold bright white and muted yellow bags, either of which could then hold your shiny gold bag."
+        );
     }
 }
