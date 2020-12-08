@@ -15,7 +15,50 @@ pub fn part1(inp: String) {
     println!("acc: {}", acc);
 }
 
-pub fn part2(inp: String) {}
+pub fn part2(inp: String) {
+    let mut instructions = read_instructions(&inp);
+
+    for mutation_pc in 0..instructions.len() {
+        let mutation_instruction = instructions[mutation_pc];
+        match mutation_instruction.0 {
+            "nop" => {
+                instructions[mutation_pc].0 = "jmp";
+                if solve_halting_problem(&instructions) {
+                    return;
+                }
+                instructions[mutation_pc].0 = "nop";
+            },
+            "jmp" => {
+                instructions[mutation_pc].0 = "nop";
+                if solve_halting_problem(&instructions) {
+                    return;
+                }
+                instructions[mutation_pc].0 = "jmp";
+            },
+            "acc" => continue,
+            invalid_op => panic!("invalid instruction {}", invalid_op),
+        }
+    }
+}
+
+fn solve_halting_problem(instructions: &Vec<(&str, i32)>) -> bool {
+    let mut acc: i32 = 0;
+    let mut pc: usize = 0;
+    let mut seen_instructions = HashSet::<usize>::new();
+
+    while !seen_instructions.contains(&pc) {
+        if pc == instructions.len() {
+            println!("END OF PROGRAM (correct)");
+            println!("acc: {}", acc);
+            return true;
+        }
+        seen_instructions.insert(pc);
+        let instruction = instructions[pc];
+        exec(&instruction, &mut pc, &mut acc);
+    }
+
+    false
+}
 
 // TODO: & doesn't work here due to missing lifetime
 // type Instruction = (&str, i32);
@@ -37,7 +80,7 @@ fn line_to_instruction(line: &str) -> (&str, i32) {
 fn exec(instruction: &(&str, i32), pc: &mut usize, acc: &mut i32) {
     let op = instruction.0;
     let arg = instruction.1;
-    match instruction.0 {
+    match op {
         "nop" => {
             *pc += 1;
         }
@@ -52,6 +95,6 @@ fn exec(instruction: &(&str, i32), pc: &mut usize, acc: &mut i32) {
             }
             *pc = new_pc as usize;
         }
-        _ => panic!("invalid instruction {}", op),
+        invalid_op => panic!("invalid instruction {}", invalid_op),
     }
 }
