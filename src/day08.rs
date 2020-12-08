@@ -19,11 +19,15 @@ pub fn part2(inp: String) {
     let mut instructions = read_instructions(&inp);
 
     let mutations = find_mutation_candidates(&instructions);
-    mutations.iter().any(|mutation_pc| check_mutation_validity(&mut instructions, *mutation_pc));
+    mutations
+        .iter()
+        .any(|mutation_pc| check_mutation_validity(&mut instructions, *mutation_pc));
 }
 
 fn find_mutation_candidates(instructions: &Vec<(&str, i32)>) -> Vec<usize> {
-    instructions.iter().enumerate()
+    instructions
+        .iter()
+        .enumerate()
         .filter(|(_, inst)| inst.0 == "nop" || inst.0 == "jmp")
         .map(|(pc, _)| pc)
         .collect()
