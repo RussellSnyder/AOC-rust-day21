@@ -1,6 +1,60 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
 
+pub fn part1(inp: String) {
+    let shiny_gold_holding_colors = parse_bag_rules(inp);
+
+    println!(
+        "# of bag colors that can hold shiny gold: {}",
+        shiny_gold_holding_colors.len()
+    );
+}
+
+pub fn part2(inp: String) {
+    let lines = read_lines(&inp);
+
+    println!("{:?}", lines);
+}
+
+
+fn parse_bag_rules(inp: String) -> HashSet<String> {
+    let lines = read_lines(&inp);
+
+    let rules: HashMap<String, Option<Vec<Bag>>> = lines
+        .iter()
+        .filter(|line| line.len() > 0)
+        .map(|line| create_rule(line))
+        .collect();
+
+    get_shiny_gold_holding_bag_colors(&rules)
+}
+
+fn read_lines(inp: &str) -> Vec<&str> {
+    inp.split("\n")
+        .filter(|line| line.len() > 0)
+        .collect::<Vec<&str>>()
+}
+
+fn create_rule(line: &str) -> (String, Option<Vec<Bag>>) {
+    let groups = line.split(" bags contain ");
+
+    let vec: Vec<&str> = groups.collect();
+
+    let color = vec[0].to_owned();
+    let contained_bags: Option<Vec<Bag>> = vec[1]
+        .split(", ")
+        .collect::<Vec<&str>>()
+        .iter()
+        .map(|value| value.split(" ").collect::<Vec<&str>>())
+        .map(|value| match value[0] {
+            "no" => None,
+            _ => Some(create_bag(value[1], value[2], value[0])),
+        })
+        .collect();
+
+    (color, contained_bags)
+}
+
 #[derive(Debug)]
 struct Bag {
     color: String,
@@ -15,27 +69,6 @@ fn create_bag(color_1: &str, color_2: &str, count_str: &str) -> Bag {
     let count = count_str.parse::<usize>().unwrap();
 
     Bag { count, color }
-}
-
-pub fn part1(inp: String) {
-    let shiny_gold_holding_colors = parse_bag_rules(inp);
-
-    println!(
-        "# of bag colors that can hold shiny gold: {}",
-        shiny_gold_holding_colors.len()
-    );
-}
-
-fn parse_bag_rules(inp: String) -> HashSet<String> {
-    let lines = read_lines(&inp);
-
-    let rules: HashMap<String, Option<Vec<Bag>>> = lines
-        .iter()
-        .filter(|line| line.len() > 0)
-        .map(|line| create_rule(line))
-        .collect();
-
-    get_shiny_gold_holding_bag_colors(&rules)
 }
 
 fn get_shiny_gold_holding_bag_colors(rules: &HashMap<String, Option<Vec<Bag>>>) -> HashSet<String> {
@@ -91,37 +124,6 @@ fn is_shiny_gold_bag(bag: &Bag) -> bool {
     bag.color == "shiny gold"
 }
 
-pub fn part2(inp: String) {
-    let lines = read_lines(&inp);
-
-    println!("{:?}", lines);
-}
-
-fn read_lines(inp: &str) -> Vec<&str> {
-    inp.split("\n")
-        .filter(|line| line.len() > 0)
-        .collect::<Vec<&str>>()
-}
-
-fn create_rule(line: &str) -> (String, Option<Vec<Bag>>) {
-    let groups = line.split(" bags contain ");
-
-    let vec: Vec<&str> = groups.collect();
-
-    let color = vec[0].to_owned();
-    let contained_bags: Option<Vec<Bag>> = vec[1]
-        .split(", ")
-        .collect::<Vec<&str>>()
-        .iter()
-        .map(|value| value.split(" ").collect::<Vec<&str>>())
-        .map(|value| match value[0] {
-            "no" => None,
-            _ => Some(create_bag(value[1], value[2], value[0])),
-        })
-        .collect();
-
-    (color, contained_bags)
-}
 
 #[cfg(test)]
 mod test {
