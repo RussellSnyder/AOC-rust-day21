@@ -2,7 +2,8 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 
 pub fn part1(inp: String) {
-    let shiny_gold_holding_colors = parse_bag_rules(inp);
+    let rules = parse_bag_rules(inp);
+    let shiny_gold_holding_colors = get_shiny_gold_holding_bag_colors(&rules);
 
     println!(
         "# of bag colors that can hold shiny gold: {}",
@@ -11,22 +12,18 @@ pub fn part1(inp: String) {
 }
 
 pub fn part2(inp: String) {
-    let lines = read_lines(&inp);
+    let rules = parse_bag_rules(inp);
+    let number_of_bags = count_bags_in_shiny_gold_bag(&rules);
 
-    println!("{:?}", lines);
+    println!("# of bags contained in shiny gold bag: {}", number_of_bags);
 }
 
-
-fn parse_bag_rules(inp: String) -> HashSet<String> {
-    let lines = read_lines(&inp);
-
-    let rules: HashMap<String, Option<Vec<Bag>>> = lines
+fn parse_bag_rules(inp: String) -> HashMap<String, Option<Vec<Bag>>> {
+    read_lines(&inp)
         .iter()
         .filter(|line| line.len() > 0)
         .map(|line| create_rule(line))
-        .collect();
-
-    get_shiny_gold_holding_bag_colors(&rules)
+        .collect::<HashMap<String, Option<Vec<Bag>>>>()
 }
 
 fn read_lines(inp: &str) -> Vec<&str> {
@@ -124,6 +121,19 @@ fn is_shiny_gold_bag(bag: &Bag) -> bool {
     bag.color == "shiny gold"
 }
 
+fn count_bags_in_shiny_gold_bag(rules: &HashMap<String, Option<Vec<Bag>>>) -> usize {
+    let shiny_gold_bag = &rules["shiny gold"];
+    count_inner_bags(shiny_gold_bag, rules)
+}
+
+fn count_inner_bags(bags: &Option<Vec<Bag>>, rules: &HashMap<String, Option<Vec<Bag>>>) -> usize {
+    match bags {
+        None => 0,
+        Some(inner_bags) => inner_bags.iter().fold(0, |acc, cur| {
+            acc + cur.count + (cur.count * count_inner_bags(&rules[&cur.color], rules))
+        }),
+    }
+}
 
 #[cfg(test)]
 mod test {
@@ -231,7 +241,8 @@ faded blue bags contain no other bags.
 dotted black bags contain no other bags.
 "#;
 
-        let shiny_gold_holding_colors = parse_bag_rules(input.to_string());
+        let rules = parse_bag_rules(input.to_string());
+        let shiny_gold_holding_colors = get_shiny_gold_holding_bag_colors(&rules);
 
         assert_eq!(shiny_gold_holding_colors.len(), 4);
         assert_eq!(
@@ -253,5 +264,23 @@ dotted black bags contain no other bags.
              true,
             "A light red bag, which can hold bright white and muted yellow bags, either of which could then hold your shiny gold bag."
         );
+    }
+
+    #[test]
+    pub fn official_part_2_sample_input() {
+        let input = r#"
+shiny gold bags contain 2 dark red bags.
+dark red bags contain 2 dark orange bags.
+dark orange bags contain 2 dark yellow bags.
+dark yellow bags contain 2 dark green bags.
+dark green bags contain 2 dark blue bags.
+dark blue bags contain 2 dark violet bags.
+dark violet bags contain no other bags.
+"#;
+
+        let rules = parse_bag_rules(input.to_string());
+        let number_of_bags = count_bags_in_shiny_gold_bag(&rules);
+
+        assert_eq!(number_of_bags, 126);
     }
 }
