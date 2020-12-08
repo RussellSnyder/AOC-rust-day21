@@ -18,27 +18,23 @@ pub fn part1(inp: String) {
 pub fn part2(inp: String) {
     let mut instructions = read_instructions(&inp);
 
-    for mutation_pc in 0..instructions.len() {
-        let mutation_instruction = instructions[mutation_pc];
-        match mutation_instruction.0 {
-            "nop" => {
-                instructions[mutation_pc].0 = "jmp";
-                if solve_halting_problem(&instructions) {
-                    return;
-                }
-                instructions[mutation_pc].0 = "nop";
-            },
-            "jmp" => {
-                instructions[mutation_pc].0 = "nop";
-                if solve_halting_problem(&instructions) {
-                    return;
-                }
-                instructions[mutation_pc].0 = "jmp";
-            },
-            "acc" => continue,
-            invalid_op => panic!("invalid instruction {}", invalid_op),
-        }
-    }
+    let mutations = find_mutation_candidates(&instructions);
+    mutations.iter().any(|mutation_pc| check_mutation_validity(&mut instructions, *mutation_pc));
+}
+
+fn find_mutation_candidates(instructions: &Vec<(&str, i32)>) -> Vec<usize> {
+    instructions.iter().enumerate()
+        .filter(|(_, inst)| inst.0 == "nop" || inst.0 == "jmp")
+        .map(|(pc, _)| pc)
+        .collect()
+}
+
+fn check_mutation_validity(instructions: &mut Vec<(&str, i32)>, mutation_pc: usize) -> bool {
+    let old_instr = instructions[mutation_pc].0;
+    instructions[mutation_pc].0 = if old_instr == "nop" { "jmp" } else { "nop" };
+    let ret = solve_halting_problem(&instructions);
+    instructions[mutation_pc].0 = old_instr;
+    ret
 }
 
 fn solve_halting_problem(instructions: &Vec<(&str, i32)>) -> bool {
