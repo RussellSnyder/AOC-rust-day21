@@ -191,27 +191,17 @@ impl HairColorChecker {
 }
 
 struct PidChecker {
-    regex_works: Regex,
-    regex_worksnt: Regex,
+    regex: Regex,
 }
 
 impl PidChecker {
     fn new() -> Self {
-        let regex_works = Regex::new("[0-9]{9}").unwrap(); // works but shouldn't
-        let regex_worksnt = Regex::new("^[0-9]{9}$").unwrap(); // worksn't but should
-        Self {
-            regex_works,
-            regex_worksnt,
-        }
+        let regex = Regex::new("^[0-9]{9}$").unwrap();
+        Self { regex }
     }
 
     fn is_valid_pid(&self, field: &str) -> bool {
-        let ret_works = self.regex_works.is_match(field);
-        let ret_worksnt = self.regex_worksnt.is_match(field);
-        if ret_works != ret_worksnt {
-            // panic!("Wtf? {}", field);
-        }
-        ret_works
+        self.regex.is_match(field)
     }
 }
 
@@ -224,6 +214,5 @@ fn is_valid_eyecolor(field: &str) -> bool {
         }
     }
 
-    // println!("Invalid eyecolor? {}", field);
     false
 }
