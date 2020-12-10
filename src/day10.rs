@@ -1,3 +1,6 @@
+use std::collections::HashMap;
+use std::collections::HashSet;
+
 pub fn part1(inp: String) {
     let mut numbers = read_numbers(&inp);
     let (diff_of_1, diff_of_3) = find_diffs(&mut numbers);
@@ -31,7 +34,35 @@ fn find_diffs(numbers: &mut Vec<usize>) -> (usize, usize) {
 
 pub fn part2(inp: String) {
     let numbers = read_numbers(&inp);
-    println!("TODO: {:?}", numbers);
+
+
+    // just to trigger the debug output
+    let input = vec![0, 1, 4, 5, 6, 7, 10, 11, 12, 15, 16, 19];
+    let result = calc_next_adaptors(&input);
+    // just to trigger the debug output
+
+
+    // println!("TODO: {:?}", numbers);
+}
+
+fn calc_next_adaptors(adaptors: &Vec<usize>) -> HashMap<usize, Vec<usize>> {
+    let mut next_adaptors = HashMap::<usize, Vec<usize>>::new();
+
+    for (index, _) in adaptors.iter().enumerate() {
+        let mut next_for_this: Vec<usize> = vec![];
+        for diff in 1..=3 {
+            let ancestor = adaptors.get(index + diff); // FIXME BUG BUG BUG
+            match ancestor {
+                Some(next_adaptor) => next_for_this.push(*next_adaptor),
+                None => (),
+            }
+        }
+        next_adaptors.insert(index, next_for_this);
+    }
+
+    println!("{:?}", next_adaptors);
+
+    next_adaptors
 }
 
 fn read_numbers(inp: &str) -> Vec<usize> {
@@ -66,5 +97,19 @@ mod test {
 
         assert_eq!(diff_of_1, 22);
         assert_eq!(diff_of_3, 10);
+    }
+
+    #[test]
+    pub fn calc_next_adaptors_small_input() {
+        let input = vec![0, 1, 4, 5, 6, 7, 10, 11, 12, 15, 16, 19];
+        let next_for_0: Vec<usize> = vec![1];
+        let next_for_1: Vec<usize> = vec![4];
+        let next_for_4: Vec<usize> = vec![5, 6, 7];
+
+        let result = calc_next_adaptors(&input);
+
+        assert_eq!(*result.get(&0).unwrap(), next_for_0);
+        assert_eq!(*result.get(&1).unwrap(), next_for_1);
+        assert_eq!(*result.get(&2).unwrap(), next_for_4);
     }
 }
