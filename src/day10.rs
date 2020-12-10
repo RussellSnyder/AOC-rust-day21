@@ -35,12 +35,10 @@ fn find_diffs(numbers: &mut Vec<usize>) -> (usize, usize) {
 pub fn part2(inp: String) {
     let numbers = read_numbers(&inp);
 
-
     // just to trigger the debug output
     let input = vec![0, 1, 4, 5, 6, 7, 10, 11, 12, 15, 16, 19];
     let result = calc_next_adaptors(&input);
     // just to trigger the debug output
-
 
     // println!("TODO: {:?}", numbers);
 }
@@ -48,16 +46,20 @@ pub fn part2(inp: String) {
 fn calc_next_adaptors(adaptors: &Vec<usize>) -> HashMap<usize, Vec<usize>> {
     let mut next_adaptors = HashMap::<usize, Vec<usize>>::new();
 
-    for (index, _) in adaptors.iter().enumerate() {
-        let mut next_for_this: Vec<usize> = vec![];
+    for (index, adaptor) in adaptors.iter().enumerate() {
+        let mut reachable: Vec<usize> = vec![];
         for diff in 1..=3 {
-            let ancestor = adaptors.get(index + diff); // FIXME BUG BUG BUG
+            let ancestor = adaptors.get(index + diff);
             match ancestor {
-                Some(next_adaptor) => next_for_this.push(*next_adaptor),
+                Some(next_adaptor) => {
+                    if next_adaptor - adaptor <= 3 {
+                        reachable.push(*next_adaptor)
+                    }
+                }
                 None => (),
             }
         }
-        next_adaptors.insert(index, next_for_this);
+        next_adaptors.insert(index, reachable);
     }
 
     println!("{:?}", next_adaptors);
@@ -101,15 +103,27 @@ mod test {
 
     #[test]
     pub fn calc_next_adaptors_small_input() {
-        let input = vec![0, 1, 4, 5, 6, 7, 10, 11, 12, 15, 16, 19];
-        let next_for_0: Vec<usize> = vec![1];
-        let next_for_1: Vec<usize> = vec![4];
-        let next_for_4: Vec<usize> = vec![5, 6, 7];
+        let input = vec![0, 1, 4, 5, 6, 7, 10, 11, 12, 15, 16, 19, 22];
+        let expected_reachable_from_index = vec![
+            vec![1],
+            vec![4],
+            vec![5, 6, 7],
+            vec![6, 7],
+            vec![7],
+            vec![10],
+            vec![11, 12],
+            vec![12],
+            vec![15],
+            vec![16],
+            vec![19],
+            vec![22],
+            vec![],
+        ];
 
         let result = calc_next_adaptors(&input);
 
-        assert_eq!(*result.get(&0).unwrap(), next_for_0);
-        assert_eq!(*result.get(&1).unwrap(), next_for_1);
-        assert_eq!(*result.get(&2).unwrap(), next_for_4);
+        for (index, value) in expected_reachable_from_index.iter().enumerate() {
+            assert_eq!(*result.get(&index).unwrap(), *value);
+        }
     }
 }
