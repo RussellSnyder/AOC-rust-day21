@@ -39,7 +39,7 @@ pub fn part2(inp: String) {
     adaptors.push(adaptors.last().unwrap() + 3); // diff to device is always 3
 
     let next_adaptors = calc_next_adaptors(&adaptors);
-    println!("next adaptors: {:?}", next_adaptors);
+    // println!("next adaptors: {:?}", next_adaptors);
 
     //   key in map is adapter joltage
     // value in map is number of combinations to reach this node
@@ -49,14 +49,14 @@ pub fn part2(inp: String) {
 
     for joltage in adaptors.iter().rev() {
         let next = next_adaptors.get(&joltage).unwrap();
-        println!("next for {}: {:?}", joltage, next);
+        // println!("next for {}: {:?}", joltage, next);
         match next.len() {
             0 => {
                 combinations.insert(*joltage, 1);
             }
             1..=3 => {
                 let sum = next.iter().fold(0, |acc, cur| acc + combinations.get(cur).unwrap());
-                println!("combinations for joltage {}: {}", joltage, sum);
+                // println!("combinations for joltage {}: {}", joltage, sum);
                 combinations.insert(*joltage, sum);
             }
             _ => {
@@ -65,7 +65,7 @@ pub fn part2(inp: String) {
         }
     }
 
-    // println!("{:?}", next_adaptors.get(&89));
+    println!("Adapter arrangements: {}", combinations.get(&0).unwrap());
 }
 
 fn calc_next_adaptors(adaptors: &Vec<usize>) -> HashMap<usize, Vec<usize>> {
