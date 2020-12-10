@@ -92,7 +92,7 @@ mod test {
     }
 
     #[test]
-    pub fn get_premable_sample1() {
+    pub fn get_preamble_sample1() {
         let all_numbers = vec![9, 8, 7, 6, 5, 4, 3, 2, 1];
         let index = 7;
         let length = 3;

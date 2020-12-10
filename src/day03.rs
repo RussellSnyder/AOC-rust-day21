@@ -23,7 +23,7 @@ fn input_to_slope(inp: String) -> Vec<Vec<bool>> {
     lines
         .iter()
         .filter(|line| line.len() > 0)
-        .map(|line| to_treemap(line))
+        .map(|line| to_tree_map(line))
         .collect::<Vec<Vec<bool>>>()
 }
 
@@ -44,7 +44,7 @@ fn count_trees(slope: &Vec<Vec<bool>>, right: usize, down: usize) -> usize {
         .sum()
 }
 
-fn to_treemap(row: &str) -> Vec<bool> {
+fn to_tree_map(row: &str) -> Vec<bool> {
     let mut ret = vec![];
     for ch in row.chars() {
         ret.push(match ch {

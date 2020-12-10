@@ -59,7 +59,7 @@ fn parse_file(inp: &str) -> Vec<bool> {
 }
 
 fn validate_passport(passport: &str) -> bool {
-    let haircolor_checker = HairColorChecker::new();
+    let hair_color_checker = HairColorChecker::new();
     let pid_checker = PidChecker::new();
 
     let fields = passport
@@ -78,13 +78,13 @@ fn validate_passport(passport: &str) -> bool {
 
     fields
         .iter()
-        .map(|word| validate_field(word, &haircolor_checker, &pid_checker))
+        .map(|word| validate_field(word, &hair_color_checker, &pid_checker))
         .all(|x| x)
 }
 
 fn validate_field(
     field: &str,
-    haircolor_checker: &HairColorChecker,
+    hair_color_checker: &HairColorChecker,
     pid_checker: &PidChecker,
 ) -> bool {
     let name_value = field.split(":").collect::<Vec<&str>>();
@@ -97,12 +97,12 @@ fn validate_field(
     let value = name_value[1];
 
     match name {
-        "byr" => is_valid_birthyear(value),
-        "iyr" => is_valid_issueyear(value),
-        "eyr" => is_valid_expirationyear(value),
+        "byr" => is_valid_birth_year(value),
+        "iyr" => is_valid_issue_year(value),
+        "eyr" => is_valid_expiration_year(value),
         "hgt" => is_valid_height(value),
-        "hcl" => haircolor_checker.is_valid_haircolor(value),
-        "ecl" => is_valid_eyecolor(value),
+        "hcl" => hair_color_checker.is_valid_hair_color(value),
+        "ecl" => is_valid_eye_color(value),
         "pid" => pid_checker.is_valid_pid(value),
         "cid" => true,
         _ => panic!("Argh, unknown field type: {}", name),
@@ -123,7 +123,7 @@ fn has_all_fields(passport: &Vec<String>) -> bool {
     true
 }
 
-fn is_valid_birthyear(value: &str) -> bool {
+fn is_valid_birth_year(value: &str) -> bool {
     if value.len() != 4 {
         return false;
     }
@@ -134,7 +134,7 @@ fn is_valid_birthyear(value: &str) -> bool {
     }
 }
 
-fn is_valid_issueyear(field: &str) -> bool {
+fn is_valid_issue_year(field: &str) -> bool {
     if field.len() != 4 {
         return false;
     }
@@ -145,7 +145,7 @@ fn is_valid_issueyear(field: &str) -> bool {
     }
 }
 
-fn is_valid_expirationyear(field: &str) -> bool {
+fn is_valid_expiration_year(field: &str) -> bool {
     if field.len() != 4 {
         return false;
     }
@@ -185,7 +185,7 @@ impl HairColorChecker {
         Self { regex }
     }
 
-    fn is_valid_haircolor(&self, field: &str) -> bool {
+    fn is_valid_hair_color(&self, field: &str) -> bool {
         self.regex.is_match(field)
     }
 }
@@ -205,10 +205,10 @@ impl PidChecker {
     }
 }
 
-fn is_valid_eyecolor(field: &str) -> bool {
-    let eyecolors = vec!["amb", "blu", "brn", "gry", "grn", "hzl", "oth"];
+fn is_valid_eye_color(field: &str) -> bool {
+    let eye_colors = vec!["amb", "blu", "brn", "gry", "grn", "hzl", "oth"];
 
-    for ec in eyecolors {
+    for ec in eye_colors {
         if ec == field {
             return true;
         }

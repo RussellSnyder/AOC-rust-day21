@@ -3,8 +3,8 @@ use std::collections::HashMap;
 pub fn part1(inp: String) {
     let mut numbers = read_numbers(&inp);
     let (diff_of_1, diff_of_3) = find_diffs(&mut numbers);
-    let mult = diff_of_1 * diff_of_3;
-    println!("1s: {} / 3s: {} / mult: {}", diff_of_1, diff_of_3, mult);
+    let result = diff_of_1 * diff_of_3;
+    println!("1s: {} / 3s: {} / result: {}", diff_of_1, diff_of_3, result);
 }
 
 fn find_diffs(adaptors: &mut Vec<usize>) -> (usize, usize) {
