@@ -55,7 +55,9 @@ pub fn part2(inp: String) {
                 combinations.insert(*joltage, 1);
             }
             1..=3 => {
-                let sum = next.iter().fold(0, |acc, cur| acc + combinations.get(cur).unwrap());
+                let sum = next
+                    .iter()
+                    .fold(0, |acc, cur| acc + combinations.get(cur).unwrap());
                 // println!("combinations for joltage {}: {}", joltage, sum);
                 combinations.insert(*joltage, sum);
             }
