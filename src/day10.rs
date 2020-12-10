@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::collections::HashSet;
 
 pub fn part1(inp: String) {
     let mut numbers = read_numbers(&inp);
@@ -39,12 +38,39 @@ pub fn part2(inp: String) {
     adaptors.sort();
     adaptors.push(adaptors.last().unwrap() + 3); // diff to device is always 3
 
-    let result = calc_next_adaptors(&adaptors);
+    let next_adaptors = calc_next_adaptors(&adaptors);
+    println!("next adaptors: {:?}", next_adaptors);
 
-    println!("TODO: {:?}", result);
+    //   key in map is adapter joltage
+    // value in map is number of combinations to reach this node
+    let mut combinations = HashMap::<usize, usize>::new();
+    let device_index = adaptors.len() - 1;
+    combinations.insert(device_index, 1);
+
+    for joltage in adaptors.iter().rev() {
+        let next = next_adaptors.get(&joltage).unwrap();
+        println!("next for {}: {:?}", joltage, next);
+        match next.len() {
+            0 => {
+                combinations.insert(*joltage, 1);
+            }
+            1..=3 => {
+                let sum = next.iter().fold(0, |acc, cur| acc + combinations.get(cur).unwrap());
+                println!("combinations for joltage {}: {}", joltage, sum);
+                combinations.insert(*joltage, sum);
+            }
+            _ => {
+                panic!("adapter {} has more than 3 next adaptors");
+            }
+        }
+    }
+
+    // println!("{:?}", next_adaptors.get(&89));
 }
 
 fn calc_next_adaptors(adaptors: &Vec<usize>) -> HashMap<usize, Vec<usize>> {
+    //   key in map is adapter joltage
+    // value in map is list of joltages of reachable adapters
     let mut next_adaptors = HashMap::<usize, Vec<usize>>::new();
 
     for (index, adaptor) in adaptors.iter().enumerate() {
@@ -60,7 +86,7 @@ fn calc_next_adaptors(adaptors: &Vec<usize>) -> HashMap<usize, Vec<usize>> {
                 None => (),
             }
         }
-        next_adaptors.insert(index, reachable);
+        next_adaptors.insert(*adaptor, reachable);
     }
 
     next_adaptors
@@ -122,7 +148,8 @@ mod test {
         let result = calc_next_adaptors(&input);
 
         for (index, value) in expected_reachable_from_index.iter().enumerate() {
-            assert_eq!(*result.get(&index).unwrap(), *value);
+            let from = input.get(index).unwrap();
+            assert_eq!(*result.get(&from).unwrap(), *value);
         }
     }
 }
