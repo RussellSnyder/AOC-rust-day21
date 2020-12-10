@@ -8,19 +8,19 @@ pub fn part1(inp: String) {
     println!("1s: {} / 3s: {} / mult: {}", diff_of_1, diff_of_3, mult);
 }
 
-fn find_diffs(numbers: &mut Vec<usize>) -> (usize, usize) {
-    numbers.push(0); // outlet is 0
-    numbers.sort();
-    numbers.push(numbers.last().unwrap() + 3); // diff to device is always 3
+fn find_diffs(adaptors: &mut Vec<usize>) -> (usize, usize) {
+    adaptors.push(0); // outlet is 0
+    adaptors.sort();
+    adaptors.push(adaptors.last().unwrap() + 3); // diff to device is always 3
 
     let mut diff_of_1 = 0;
     let mut diff_of_3 = 0;
 
-    //    [(0), 2, 3, 4, 6, (last+3)]
-    // -> [   2, 1, 1, 2 ]
+    //    [(0) 2 3 4 6 (last+3)]
+    // -> [   2 1 1 2 3        ]
 
-    for (index, number) in numbers.iter().enumerate().skip(1) {
-        let diff = number - numbers[index - 1];
+    for (index, adaptor) in adaptors.iter().enumerate().skip(1) {
+        let diff = adaptor - adaptors[index - 1];
         if diff == 1 {
             diff_of_1 += 1;
         }
@@ -33,14 +33,15 @@ fn find_diffs(numbers: &mut Vec<usize>) -> (usize, usize) {
 }
 
 pub fn part2(inp: String) {
-    let numbers = read_numbers(&inp);
+    let mut adaptors = read_numbers(&inp);
 
-    // just to trigger the debug output
-    let input = vec![0, 1, 4, 5, 6, 7, 10, 11, 12, 15, 16, 19];
-    let result = calc_next_adaptors(&input);
-    // just to trigger the debug output
+    adaptors.push(0); // outlet is 0
+    adaptors.sort();
+    adaptors.push(adaptors.last().unwrap() + 3); // diff to device is always 3
 
-    // println!("TODO: {:?}", numbers);
+    let result = calc_next_adaptors(&adaptors);
+
+    println!("TODO: {:?}", result);
 }
 
 fn calc_next_adaptors(adaptors: &Vec<usize>) -> HashMap<usize, Vec<usize>> {
@@ -61,8 +62,6 @@ fn calc_next_adaptors(adaptors: &Vec<usize>) -> HashMap<usize, Vec<usize>> {
         }
         next_adaptors.insert(index, reachable);
     }
-
-    println!("{:?}", next_adaptors);
 
     next_adaptors
 }
