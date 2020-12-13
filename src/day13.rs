@@ -32,7 +32,7 @@ fn calc_waiting_time(current_time: usize, bus_interval: usize) -> usize {
 }
 
 pub fn part2(_inp: String) {
-    // let mut numbers = read_numbers(&inp);
+    println!("Something something Chinese remainder theorem. We gave up. ¯\\_(ツ)_/¯");
 }
 
 fn read_input(inp: &str) -> (usize, Vec<usize>) {
