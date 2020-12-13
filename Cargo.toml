@@ -9,3 +9,4 @@ edition = "2018"
 [dependencies]
 regex = "1"
 partial_application = "0.2.1"
+urlencoding = "1.1.1"

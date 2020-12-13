@@ -1,5 +1,7 @@
+use urlencoding;
+
 pub fn part1(inp: String) {
-    let (current_time, bus_ids) = read_input(&inp);
+    let (current_time, bus_ids) = read_input_part1(&inp);
 
     let (bus_id, waiting_time) = bus_baun(current_time, &bus_ids);
     println!(
@@ -8,6 +10,20 @@ pub fn part1(inp: String) {
         waiting_time,
         bus_id * waiting_time
     );
+}
+
+fn read_input_part1(inp: &str) -> (usize, Vec<usize>) {
+    let lines: Vec<&str> = inp.split("\n").filter(|line| line.len() > 0).collect();
+
+    let current_time = lines[0].parse::<usize>().unwrap();
+
+    let bus_ids: Vec<usize> = lines[1]
+        .split(",")
+        .filter(|entry| *entry != "x")
+        .map(|id| id.parse::<usize>().unwrap())
+        .collect();
+
+    (current_time, bus_ids)
 }
 
 fn bus_baun(current_time: usize, bus_ids: &Vec<usize>) -> (usize, usize) {
@@ -31,22 +47,41 @@ fn calc_waiting_time(current_time: usize, bus_interval: usize) -> usize {
     time_until_next_arrival // quick math :D
 }
 
-pub fn part2(_inp: String) {
-    println!("Something something Chinese remainder theorem. We gave up. ¯\\_(ツ)_/¯");
+pub fn part2(inp: String) {
+    let bussis = read_input_part2(&inp);
+
+    // would be nice, but Wolfram Alpha does not care :-(
+    // let lcm_condition = format!(
+    //     "0 < t < {}",
+    //     bussis
+    //         .iter()
+    //         .map(|(_, value)| value.to_string())
+    //         .collect::<Vec<String>>()
+    //         .join(" * ")
+    // );
+
+    let offset_conditions = bussis
+        .iter()
+        .map(|(offset, value)| format!("(t + {}) mod {} = 0", offset, value))
+        .collect::<Vec<String>>()
+        .join("; ");
+
+    let query_params = urlencoding::encode(&offset_conditions);
+
+    println!("Smash that URL:");
+    println!("https://www.wolframalpha.com/input/?i={}", query_params);
+    println!("Result is like t = x * n + result");
 }
 
-fn read_input(inp: &str) -> (usize, Vec<usize>) {
+fn read_input_part2(inp: &str) -> Vec<(usize, usize)> {
     let lines: Vec<&str> = inp.split("\n").filter(|line| line.len() > 0).collect();
 
-    let current_time = lines[0].parse::<usize>().unwrap();
-
-    let bus_ids: Vec<usize> = lines[1]
+    lines[1]
         .split(",")
-        .filter(|entry| *entry != "x")
-        .map(|id| id.parse::<usize>().unwrap())
-        .collect();
-
-    (current_time, bus_ids)
+        .enumerate()
+        .filter(|(_, value)| *value != "x")
+        .map(|(index, value)| (index, value.parse::<usize>().unwrap()))
+        .collect()
 }
 
 #[cfg(test)]
@@ -57,7 +92,7 @@ mod test {
     pub fn read_input_part1_sample() {
         let input = "939\n7,13,x,x,59,x,31,19";
 
-        let result = read_input(&input);
+        let result = read_input_part1(&input);
 
         assert_eq!(result, (939, vec![7, 13, 59, 31, 19]));
     }
@@ -65,7 +100,7 @@ mod test {
     #[test]
     pub fn bus_baun_part1_sample() {
         let input_str = "939\n7,13,x,x,59,x,31,19";
-        let (current_time, bus_ids) = read_input(input_str);
+        let (current_time, bus_ids) = read_input_part1(input_str);
 
         let result = bus_baun(current_time, &bus_ids);
 
