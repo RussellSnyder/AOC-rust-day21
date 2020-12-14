@@ -48,7 +48,8 @@ fn compute_sum_part2(commands: &Vec<Command>) -> u64 {
             }
             Command::SetValue(set_masked_value) => {
                 // println!("set_masked_value({}, {})",set_masked_value.address, set_masked_value.value);
-                memory.set_value_with_address_mask(set_masked_value.address, set_masked_value.value);
+                memory
+                    .set_value_with_address_mask(set_masked_value.address, set_masked_value.value);
             }
         }
     }
@@ -151,7 +152,7 @@ impl Memory {
                 }
                 None => {
                     self.mask_has_x_at.push(index);
-                },
+                }
             }
         }
 
