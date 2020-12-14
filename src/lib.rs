@@ -14,6 +14,7 @@ pub mod day07;
 pub mod day08;
 pub mod day09;
 pub mod day10;
+pub mod day12;
 pub mod day13;
 pub mod day14;
 
@@ -33,6 +34,7 @@ pub fn get_day(day: u32) -> (DayFn, DayFn) {
         8 => (day08::part1, day08::part2), // driver: yogan, navigator: dnnr
         9 => (day09::part1, day09::part2), // driver: dnnr,  navigator: yogan, Russell
         10 => (day10::part1, day10::part2), // driver: yogan, navigator: Russell (pt. 1, start of pt. 2)
+        12 => (day12::part1, day12::part2), // driver: dnnr, navigator: yogan
         13 => (day13::part1, day13::part2), // driver: yogan, navigator: dnnr
         14 => (day14::part1, day14::part2), // driver: dnnr, navigator: yogan
         _ => {
