@@ -13,14 +13,14 @@ pub fn part2(inp: String) {
 }
 
 fn read_input(inp: &String) -> &str {
-    inp.split("\n").filter(|line| line.len() > 0).next().unwrap()
+    inp.split("\n")
+        .filter(|line| line.len() > 0)
+        .next()
+        .unwrap()
 }
 
 fn calculate_sequence(line: &str, limit: usize) -> Vec<u32> {
-    let sequence: Vec<u32> = line
-        .split(",")
-        .map(|s| s.parse::<u32>().unwrap())
-        .collect();
+    let sequence: Vec<u32> = line.split(",").map(|s| s.parse::<u32>().unwrap()).collect();
 
     // keys are numbers, values are last seen indices in sequence
     let mut last_seen: HashMap<u32, u32> = HashMap::new();
