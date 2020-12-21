@@ -19,6 +19,7 @@ pub mod day13;
 pub mod day14;
 pub mod day15;
 pub mod day16;
+pub mod day21;
 
 pub fn noop(_inp: String) {}
 
@@ -41,6 +42,7 @@ pub fn get_day(day: u32) -> (DayFn, DayFn) {
         14 => (day14::part1, day14::part2), // driver: dnnr, navigator: yogan
         15 => (day15::part1, day15::part2), // driver: yogan, navigator: Russell, dnnr
         16 => (day16::part1, day16::part2), // driver: yogan, navigator: Russell (pt. 1, start of pt. 2)
+        21 => (day21::part1, day21::part2), // driver: Russell, navigator: dnnr
         _ => {
             println!("Unknown day: {}", day);
             return (noop, noop);
